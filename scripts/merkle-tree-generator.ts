@@ -8,7 +8,7 @@ import { resolve } from "node:path";
 const filePath: string = resolve("data", "records.csv");
 type RecordType = { address: string; amount: string };
 
-export async function generateMerkleTree(): Promise<MerkleTree> {
+async function generateMerkleTree(): Promise<MerkleTree> {
   const parser = parse({ columns: true }) as unknown as NodeJS.ReadWriteStream;
   const records: RecordType[] = [];
 
@@ -46,11 +46,20 @@ export async function generateMerkleTree(): Promise<MerkleTree> {
   });
 }
 
-// Usage example
-generateMerkleTree()
-  .then((tree) => {
-    console.info("Merkle Tree Root:", tree.getHexRoot());
-  })
-  .catch((error) => {
-    console.error("Error generating Merkle Tree Root:", error);
-  });
+export async function generateMerkleProof(
+  address: string,
+  amount: string
+): Promise<string[]> {
+  const tree = await generateMerkleTree();
+
+  const leaf = keccak256(
+    solidityPacked(["address", "uint256"], [address, parseUnits(amount, 18)])
+  );
+
+  return tree.getHexProof(leaf);
+}
+
+export async function getMerkleRoot(): Promise<string> {
+  const tree = await generateMerkleTree();
+  return tree.getHexRoot();
+}

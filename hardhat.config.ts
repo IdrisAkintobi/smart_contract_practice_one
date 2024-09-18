@@ -1,6 +1,8 @@
 import "@nomicfoundation/hardhat-toolbox";
+import { parseUnits } from "ethers";
 import { HardhatUserConfig, vars } from "hardhat/config";
 
+const INFURA_API_KEY = vars.get("INFURA_API_KEY");
 const DO_NOT_LEAK = vars.get("DO_NOT_LEAK");
 const ETHERSCAN_API_KEY = vars.get("ETHERSCAN_API_KEY");
 const LISK_SEPOLIA_RPC_URL = vars.get("LISK_SEPOLIA_RPC_URL");
@@ -14,6 +16,14 @@ const config: HardhatUserConfig = {
     },
     localhost: {
       url: "http://127.0.0.1:8545",
+    },
+    hardhat: {
+      forking: {
+        url: `https://mainnet.infura.io/v3/${INFURA_API_KEY}`,
+        blockNumber: 20756770,
+        enabled: true,
+      },
+      initialBaseFeePerGas: Number(parseUnits("1", "gwei")), // Set base fee (e.g., 100 Gwei)
     },
   },
   etherscan: {

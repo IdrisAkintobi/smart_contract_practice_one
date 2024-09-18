@@ -1,7 +1,9 @@
 {
   "name": "hardhat-project",
   "scripts": {
-    "gen:merkle-root": "ts-node scripts/merkle-tree-generator.ts "
+    "build": "npx hardhat compile",
+    "start:node": "npx hardhat node",
+    "script:interaction": "npx hardhat run ./scripts/MerkleAirdrop.interaction.ts --network localhost"
   },
   "devDependencies": {
     "@nomicfoundation/hardhat-toolbox": "^5.0.0",
