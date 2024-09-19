@@ -11,17 +11,14 @@ async function main() {
   const merkleRoot = await getMerkleRoot();
   let iDrisToken: IDrisToken;
   let merkleAirdrop: MerkleAirdrop;
-  const TOKEN_HOLDER = "0x00000000b3daca9d0452fd19b121e6484def1140";
-  const AMOUNT = "9";
-  const merkleProof = await generateMerkleProof(TOKEN_HOLDER, AMOUNT);
+  const tokenHolder = "0x440bcc7a1cf465eafabae301d1d7739cbfe09dda";
+  const amount = "1";
+  const merkleProof = await generateMerkleProof(tokenHolder, amount);
 
-  await impersonateAccount(TOKEN_HOLDER);
-  const impersonatedSigner = await ethers.getSigner(TOKEN_HOLDER);
+  await impersonateAccount(tokenHolder);
+  const impersonatedSigner = await ethers.getSigner(tokenHolder);
 
-  const iDrisTokenFactory = await ethers.getContractFactory(
-    "IDrisToken",
-    impersonatedSigner
-  );
+  const iDrisTokenFactory = await ethers.getContractFactory("IDrisToken");
   iDrisToken = await iDrisTokenFactory.deploy();
 
   const merkleAirdropFactory = await ethers.getContractFactory(
@@ -35,8 +32,20 @@ async function main() {
     merkleRoot
   );
 
-  const tx = await merkleAirdrop.claim(200, merkleProof);
-  const receipt = tx.wait();
+  // Approve savings contract to spend token
+  const approvalAmount = ethers.parseEther("200");
+  const approveTx = await iDrisToken.approve(merkleAirdrop, approvalAmount);
+  await approveTx.wait();
+
+  // Transfer token to contract
+  const transferTx = await iDrisToken.transfer(merkleAirdrop, approvalAmount);
+  transferTx.wait();
+
+  const tx = await merkleAirdrop.claim(
+    ethers.parseUnits(amount, 18),
+    merkleProof
+  );
+  const receipt = await tx.wait();
 
   console.log({ receipt });
 }
